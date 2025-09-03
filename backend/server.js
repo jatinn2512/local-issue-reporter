@@ -5,7 +5,10 @@ import dotenv from "dotenv";
 import path from "path";
 import multer from "multer";
 import { fileURLToPath } from "url";
+
 import userRoutes from "./routes/userRoutes.js";
+import issueRoutes from "./routes/issueRoutes.js";
+
 
 dotenv.config();
 const app = express();
@@ -48,6 +51,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/issues", issueRoutes); // ✅ connect issues route
 
 // Default Route
 app.get("/", (req, res) => {

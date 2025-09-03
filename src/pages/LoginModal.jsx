@@ -24,6 +24,7 @@ function LoginModal({ isOpen, onClose, lang }) {
     try {
       const { data } = await API.post("/users/login", { email, password });
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userEmail", email); // ✅ added line
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -113,7 +114,7 @@ function LoginModal({ isOpen, onClose, lang }) {
             : "Login"}
         </h2>
 
-        {/* Email/Phone Toggle (Login + Signup dono ke liye) */}
+        {/* Email/Phone Toggle */}
         <div className="flex mb-6 rounded-lg overflow-hidden border border-gray-700">
           <button
             className={`flex-1 py-2 transition-all duration-200 ${

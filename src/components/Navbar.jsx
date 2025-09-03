@@ -48,7 +48,6 @@ function Navbar({ onLoginClick }) {
   const profileItems = isLoggedIn
     ? [
         { name: lang === "hi" ? "डैशबोर्ड" : "Dashboard", action: () => navigate("/dashboard") },
-        { name: lang === "hi" ? "आपका क्षेत्र" : "Your Area", action: () => navigate("/your-area") },
         { name: lang === "hi" ? "लॉगआउट" : "Logout", action: () => { logout(); navigate("/"); } },
       ]
     : [];
