@@ -65,32 +65,32 @@ function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section */}
-      <div className="flex-1 flex items-center justify-center py-16 px-6">
-        <div className="max-w-6xl w-full flex flex-col md:flex-row items-center gap-10 bg-white rounded-2xl shadow-2xl p-10 hover:shadow-xl transition">
+      <div className="flex-1 flex items-center justify-center py-20 px-6">
+        <div className="max-w-6xl w-full flex flex-col md:flex-row items-center gap-12 bg-white rounded-3xl shadow-2xl p-12 hover:shadow-3xl transition">
           {/* Left Image */}
           <motion.div
-            initial={{ x: -150, opacity: 0 }}
+            initial={{ x: -120, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, ease: "easeOut" }}
             className="flex-1 flex justify-center md:justify-start"
           >
             <img
               src="/images/report-issue.png"
               alt="Report Issue"
-              className="w-80 md:w-[480px] drop-shadow-2xl"
+              className="w-80 md:w-[460px] drop-shadow-2xl"
             />
           </motion.div>
 
           {/* Right Text */}
           <motion.div
-            initial={{ x: 150, opacity: 0 }}
+            initial={{ x: 120, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, ease: "easeOut" }}
             className="flex-1 text-center md:text-left"
           >
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-6 text-gray-900 leading-snug">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-snug bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {isHindi
                 ? "AI-सक्षम स्थानीय समस्या रिपोर्टर में आपका स्वागत है"
                 : "Welcome to AI-Powered Local Issue Reporter"}
@@ -102,9 +102,9 @@ function Home() {
             </p>
             <button
               onClick={handleReportClick}
-              className={`px-8 py-4 rounded-xl text-lg font-semibold shadow-lg transition-transform transform hover:scale-105 ${
+              className={`px-10 py-4 rounded-xl text-lg font-semibold shadow-lg transition-transform transform hover:scale-105 ${
                 isLoggedIn
-                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white"
                   : "bg-gray-600 text-white hover:bg-gray-700"
               }`}
             >
@@ -117,12 +117,12 @@ function Home() {
       {/* About Section */}
       <section
         id="about-section"
-        className="bg-white py-16 px-6 text-center shadow-inner"
+        className="bg-gradient-to-r from-blue-50 to-indigo-50 py-20 px-6 text-center"
       >
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-blue-700">
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
           {isHindi ? "हमारे बारे में" : "About Us"}
         </h2>
-        <p className="max-w-3xl mx-auto text-lg text-gray-700 leading-relaxed">
+        <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-700 leading-relaxed">
           {isHindi
             ? "AI Local Issue Reporter का उद्देश्य नागरिकों को एक आसान और तेज़ प्लेटफ़ॉर्म प्रदान करना है, जिससे वे अपने क्षेत्र की समस्याओं को दर्ज कर सकें और उन्हें समय पर हल करवाया जा सके।"
             : "Our mission is to provide citizens with a fast and simple platform to report local issues and ensure timely resolution by authorities."}
@@ -130,31 +130,35 @@ function Home() {
       </section>
 
       {/* Advantages Section */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12 text-blue-700">
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
           {isHindi
             ? "क्यों चुनें AI-पावर्ड समस्या रिपोर्टर?"
             : "Why Choose AI-Powered Local Issue Reporter?"}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {advantages.map((adv, i) => {
-            const fromX = i % 2 === 0 ? -100 : 100;
+            const fromX = i % 2 === 0 ? -120 : 120; // alternate direction
             return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: fromX }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.7, delay: i * 0.1 }}
-                className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center text-center hover:shadow-2xl transform transition-transform hover:scale-105"
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center text-center hover:shadow-2xl transform transition-transform hover:scale-105"
               >
                 <img
                   src={adv.img}
                   alt={adv.heading}
                   className="w-24 h-24 mb-6"
                 />
-                <h3 className="font-bold text-xl mb-3">{adv.heading}</h3>
-                <p className="text-gray-600 text-base">{adv.desc}</p>
+                <h3 className="font-bold text-2xl mb-4 text-gray-900">
+                  {adv.heading}
+                </h3>
+                <p className="text-gray-600 text-base leading-relaxed">
+                  {adv.desc}
+                </p>
               </motion.div>
             );
           })}
@@ -162,7 +166,7 @@ function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-100 text-center py-6 mt-8">
+      <footer className="bg-gray-100 text-center py-8 mt-12">
         <p className="text-gray-500 text-sm">
           © 2025 | No Copyright | Made with ❤️ by LOOP - X Team
         </p>

@@ -18,13 +18,12 @@ function LoginModal({ isOpen, onClose, lang }) {
 
   if (!isOpen) return null;
 
-  // ✅ Email/Password login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const { data } = await API.post("/users/login", { email, password });
       localStorage.setItem("token", data.token);
-      localStorage.setItem("userEmail", email); // ✅ added line
+      localStorage.setItem("userEmail", email);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -37,7 +36,6 @@ function LoginModal({ isOpen, onClose, lang }) {
     }
   };
 
-  // ✅ Email signup
   const handleSignupEmail = async (e) => {
     e.preventDefault();
     try {
@@ -50,7 +48,6 @@ function LoginModal({ isOpen, onClose, lang }) {
     }
   };
 
-  // ✅ Phone signup
   const handleSignupPhone = async (e) => {
     e.preventDefault();
     if (otp !== generatedOtp) {
@@ -67,7 +64,6 @@ function LoginModal({ isOpen, onClose, lang }) {
     }
   };
 
-  // ✅ OTP system
   const sendOtp = () => {
     if (phone.length !== 10) {
       alert(lang === "hi" ? "सही फ़ोन नंबर दर्ज करें" : "Enter valid phone number");
@@ -92,19 +88,19 @@ function LoginModal({ isOpen, onClose, lang }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 backdrop-blur-sm">
       <div
-        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl w-96 p-8 relative border border-gray-700 
+        className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl w-96 p-8 relative border border-gray-300 
         transform transition-all duration-300 ease-out animate-modalOpen"
       >
         {/* Close Button */}
         <button
-          className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl transition-transform duration-200 hover:scale-125"
+          className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl transition-transform duration-200 hover:scale-125"
           onClick={onClose}
         >
           ×
         </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-white mb-6 text-center animate-bounce">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center animate-bounce">
           {isSignup
             ? lang === "hi"
               ? "साइन अप"
@@ -115,12 +111,12 @@ function LoginModal({ isOpen, onClose, lang }) {
         </h2>
 
         {/* Email/Phone Toggle */}
-        <div className="flex mb-6 rounded-lg overflow-hidden border border-gray-700">
+        <div className="flex mb-6 rounded-lg overflow-hidden border border-gray-300">
           <button
             className={`flex-1 py-2 transition-all duration-200 ${
               mode === "email"
-                ? "bg-green-700 text-white"
-                : "bg-gray-800 text-gray-400 hover:text-white"
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-600 hover:text-gray-900"
             }`}
             onClick={() => setMode("email")}
           >
@@ -135,8 +131,8 @@ function LoginModal({ isOpen, onClose, lang }) {
           <button
             className={`flex-1 py-2 transition-all duration-200 ${
               mode === "phone"
-                ? "bg-green-700 text-white"
-                : "bg-gray-800 text-gray-400 hover:text-white"
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-600 hover:text-gray-900"
             }`}
             onClick={() => setMode("phone")}
           >
@@ -160,7 +156,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "ईमेल" : "Email"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <input
@@ -168,12 +164,12 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "पासवर्ड" : "Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <button
                   type="submit"
-                  className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                  className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                 >
                   {lang === "hi" ? "लॉगिन करें" : "Login"}
                 </button>
@@ -187,14 +183,14 @@ function LoginModal({ isOpen, onClose, lang }) {
                       placeholder={lang === "hi" ? "फ़ोन नंबर" : "Phone Number"}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                      className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                       pattern="[0-9]{10}"
                       required
                     />
                     <button
                       type="button"
                       onClick={sendOtp}
-                      className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                      className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                     >
                       {lang === "hi" ? "OTP भेजें" : "Send OTP"}
                     </button>
@@ -206,12 +202,12 @@ function LoginModal({ isOpen, onClose, lang }) {
                       placeholder={lang === "hi" ? "OTP दर्ज करें" : "Enter OTP"}
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                      className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                     />
                     <button
                       type="button"
                       onClick={() => setSuccess(true)}
-                      className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                      className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                     >
                       {lang === "hi" ? "सत्यापित करें और लॉगिन करें" : "Verify & Login"}
                     </button>
@@ -222,13 +218,12 @@ function LoginModal({ isOpen, onClose, lang }) {
 
             <p
               onClick={() => setIsSignup(true)}
-              className="mt-4 text-sm text-gray-400 hover:text-green-400 cursor-pointer text-center"
+              className="mt-4 text-sm text-gray-500 hover:text-green-600 cursor-pointer text-center"
             >
               {lang === "hi" ? "नए उपयोगकर्ता? साइन अप करें" : "New user? Sign up"}
             </p>
           </>
         ) : (
-          /* --- SIGNUP FORM --- */
           <>
             {mode === "email" ? (
               <form onSubmit={handleSignupEmail} className="space-y-4">
@@ -237,7 +232,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "नाम" : "Name"}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <input
@@ -245,7 +240,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "ईमेल" : "Email"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <input
@@ -253,12 +248,12 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "पासवर्ड" : "Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <button
                   type="submit"
-                  className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                  className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                 >
                   {lang === "hi" ? "साइन अप करें" : "Sign Up"}
                 </button>
@@ -270,7 +265,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "नाम" : "Name"}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   required
                 />
                 <input
@@ -278,7 +273,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   placeholder={lang === "hi" ? "फ़ोन नंबर" : "Phone Number"}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                  className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                   pattern="[0-9]{10}"
                   required
                 />
@@ -286,7 +281,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   <button
                     type="button"
                     onClick={sendOtp}
-                    className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                    className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                   >
                     {lang === "hi" ? "OTP भेजें" : "Send OTP"}
                   </button>
@@ -297,19 +292,19 @@ function LoginModal({ isOpen, onClose, lang }) {
                       placeholder={lang === "hi" ? "OTP दर्ज करें" : "Enter OTP"}
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                      className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                     />
                     <input
                       type="password"
                       placeholder={lang === "hi" ? "पासवर्ड" : "Password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg"
+                      className="w-full p-3 bg-white text-gray-800 border border-gray-300 rounded-lg"
                       required
                     />
                     <button
                       type="submit"
-                      className="w-full bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800"
+                      className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                     >
                       {lang === "hi" ? "साइन अप करें" : "Sign Up"}
                     </button>
@@ -320,7 +315,7 @@ function LoginModal({ isOpen, onClose, lang }) {
 
             <p
               onClick={() => setIsSignup(false)}
-              className="mt-4 text-sm text-gray-400 hover:text-green-400 cursor-pointer text-center"
+              className="mt-4 text-sm text-gray-500 hover:text-green-600 cursor-pointer text-center"
             >
               {lang === "hi"
                 ? "पहले से खाता है? लॉगिन करें"
@@ -331,7 +326,7 @@ function LoginModal({ isOpen, onClose, lang }) {
 
         {/* Success message */}
         {success && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-green-400 font-bold text-xl rounded-2xl animate-fadeIn">
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center text-green-600 font-bold text-xl rounded-2xl animate-fadeIn">
             {lang === "hi"
               ? "सफलतापूर्वक लॉगिन हुआ!"
               : "Successfully logged in!"}

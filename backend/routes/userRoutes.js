@@ -4,10 +4,24 @@ import Issue from "../models/issueModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import authMiddleware from "../middleware/authMiddleware.js";
+import nodemailer from "nodemailer";
+import twilio from "twilio";
 
 const router = express.Router();
 
-// ✅ Register User (email+password OR phone)
+// ✅ Twilio Client
+const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+
+// ✅ Nodemailer Config (Gmail SMTP)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER, // Gmail
+    pass: process.env.EMAIL_PASS, // App password
+  },
+});
+
+// ✅ Register User
 router.post("/register", async (req, res) => {
   const { name, email, password, phone } = req.body;
 
@@ -35,7 +49,38 @@ router.post("/register", async (req, res) => {
       phone,
     });
 
-    res.status(201).json({ message: "User registered", user });
+    // ✅ Prepare notification messages
+    const engMessage = `Hey ${name}, 🎉 You have successfully registered on AI Local Issue Reporter.`;
+    const hindiMessage = `नमस्ते ${name}, 🎉 आपने AI Local Issue Reporter पर सफलतापूर्वक पंजीकरण कर लिया है।`;
+
+    // ✅ Send Email
+    if (email) {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "✅ Registration Successful | AI Local Issue Reporter",
+        text: `${engMessage}\n\n${hindiMessage}`,
+      };
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) console.log("❌ Email error:", err);
+        else console.log("📩 Email sent:", info.response);
+      });
+    }
+
+    // ✅ Send SMS
+    if (phone) {
+      twilioClient.messages
+        .create({
+          body: `${engMessage}\n${hindiMessage}`,
+          from: process.env.TWILIO_PHONE, // Your Twilio number
+          to: `+91${phone}`, // Assuming India numbers
+        })
+        .then((msg) => console.log("📱 SMS sent:", msg.sid))
+        .catch((err) => console.log("❌ SMS error:", err));
+    }
+
+    res.status(201).json({ message: "User registered & notification sent", user });
   } catch (error) {
     console.error("Register Error:", error);
     res.status(500).json({ message: "Error registering user", error: error.message });
@@ -75,7 +120,6 @@ router.post("/login-phone", async (req, res) => {
     const user = await User.findOne({ phone });
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    // Normally you would verify OTP here
     const token = jwt.sign({ id: user._id, phone: user.phone }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -100,7 +144,7 @@ router.post("/report", authMiddleware, async (req, res) => {
   try {
     const identifier = req.user.email || req.user.phone;
 
-    // ✅ Daily limit check (15 issues per user per day)
+    // Daily limit check
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -112,17 +156,12 @@ router.post("/report", authMiddleware, async (req, res) => {
       createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    // 🔎 Debug log
-    console.log(`User: ${identifier} | Reports today: ${count}`);
-
     if (count >= 15) {
-      console.log(`❌ Limit reached for user: ${identifier}`);
       return res
         .status(429)
         .json({ message: "Daily limit reached. Please try after 24 hours." });
     }
 
-    // ✅ Save issue
     const issue = await Issue.create({
       title,
       location,
@@ -131,8 +170,6 @@ router.post("/report", authMiddleware, async (req, res) => {
       image,
       reportedBy: identifier,
     });
-
-    console.log(`✅ New issue created by ${identifier} | Total today: ${count + 1}`);
 
     res.status(201).json({ message: "Issue reported successfully!", issue });
   } catch (error) {
@@ -155,5 +192,4 @@ router.get("/my-issues", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Export router
 export default router;

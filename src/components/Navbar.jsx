@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useLogin } from "../context/LoginContext";
 import { FaUserCircle } from "react-icons/fa";
-import { FiLogOut } from "react-icons/fi";
+import { HiMenu, HiX } from "react-icons/hi";
 
 function Navbar({ onLoginClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,14 +11,25 @@ function Navbar({ onLoginClick }) {
   const { lang, toggleLanguage } = useLanguage();
   const { isLoggedIn, logout } = useLogin();
   const navigate = useNavigate();
+  const location = useLocation();
   const profileRef = useRef(null);
 
   const scrollToAbout = () => {
-    const aboutSection = document.getElementById("about-section");
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: "smooth" });
-      setMenuOpen(false);
+    if (location.pathname === "/") {
+      const aboutSection = document.getElementById("about-section");
+      if (aboutSection) {
+        aboutSection.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      navigate("/");
+      setTimeout(() => {
+        const aboutSection = document.getElementById("about-section");
+        if (aboutSection) {
+          aboutSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
     }
+    setMenuOpen(false);
   };
 
   useEffect(() => {
@@ -47,22 +58,30 @@ function Navbar({ onLoginClick }) {
 
   const profileItems = isLoggedIn
     ? [
-        { name: lang === "hi" ? "डैशबोर्ड" : "Dashboard", action: () => navigate("/dashboard") },
-        { name: lang === "hi" ? "लॉगआउट" : "Logout", action: () => { logout(); navigate("/"); } },
+        {
+          name: lang === "hi" ? "डैशबोर्ड" : "Dashboard",
+          action: () => navigate("/dashboard"),
+        },
+        {
+          name: lang === "hi" ? "लॉगआउट" : "Logout",
+          action: () => {
+            logout();
+            navigate("/");
+          },
+        },
       ]
     : [];
 
-  // Mobile menu: Home + About + Report (once) + profileItems
-  const mobileMenuItems = [
-    ...desktopMenuItems, // already includes Report
-    ...profileItems
-  ];
+  const mobileMenuItems = [...desktopMenuItems, ...profileItems];
 
   return (
-    <nav className="bg-white text-gray-800 shadow-md sticky top-0 z-50">
+    <nav className="bg-white text-gray-800 shadow-lg sticky top-0 z-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-4 md:p-6">
+        {/* Logo */}
         <h1
-          className="text-2xl md:text-3xl font-extrabold cursor-pointer text-gray-900"
+          className="text-2xl md:text-3xl font-extrabold cursor-pointer 
+          bg-gradient-to-r from-blue-600 via-green-500 to-teal-500 bg-clip-text text-transparent
+          tracking-wide drop-shadow-md hover:scale-105 transition-transform duration-300"
           onClick={() => navigate("/")}
         >
           AI Local Issue Reporter
@@ -75,7 +94,7 @@ function Navbar({ onLoginClick }) {
               <Link
                 key={idx}
                 to={item.path}
-                className="relative px-4 py-2 rounded-xl hover:text-blue-600 transition-all duration-200"
+                className="relative px-4 py-2 rounded-xl text-gray-700 hover:text-blue-600 transition-all duration-200"
               >
                 {item.name}
               </Link>
@@ -83,7 +102,7 @@ function Navbar({ onLoginClick }) {
               <button
                 key={idx}
                 onClick={item.action}
-                className="px-4 py-2 rounded-xl hover:text-blue-600 transition-all duration-200"
+                className="px-4 py-2 rounded-xl text-gray-700 hover:text-blue-600 transition-all duration-200"
               >
                 {item.name}
               </button>
@@ -93,26 +112,32 @@ function Navbar({ onLoginClick }) {
 
         {/* Right Section */}
         <div className="flex items-center space-x-3">
-          {/* Desktop Profile Icon */}
           {isLoggedIn && (
             <div ref={profileRef} className="hidden md:block relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="text-gray-800 text-2xl hover:text-blue-600 transition"
+                className="text-gray-600 text-2xl hover:text-blue-600 transition"
               >
                 <FaUserCircle />
               </button>
 
-              {/* Desktop dropdown */}
+              {/* Dropdown */}
               <div
-                className={`absolute right-0 top-14 w-56 bg-white text-gray-900 rounded-xl shadow-lg flex flex-col py-2 z-50
+                className={`absolute right-0 top-14 w-56 bg-white text-gray-800 rounded-xl shadow-xl border border-gray-200 flex flex-col py-2 z-50
                   transform transition-all duration-300
-                  ${profileOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}
+                  ${
+                    profileOpen
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 -translate-y-4 pointer-events-none"
+                  }`}
               >
                 {profileItems.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => { item.action(); setProfileOpen(false); }}
+                    onClick={() => {
+                      item.action();
+                      setProfileOpen(false);
+                    }}
                     className="px-4 py-2 hover:bg-gray-100 text-left transition transform hover:scale-105"
                   >
                     {item.name}
@@ -125,7 +150,7 @@ function Navbar({ onLoginClick }) {
           {!isLoggedIn && (
             <button
               onClick={onLoginClick}
-              className="hidden md:block bg-blue-600 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:bg-blue-700 transition"
+              className="hidden md:block bg-gradient-to-r from-blue-600 to-green-500 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
             >
               {lang === "hi" ? "लॉगिन" : "Login"}
             </button>
@@ -133,57 +158,66 @@ function Navbar({ onLoginClick }) {
 
           <button
             onClick={toggleLanguage}
-            className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full font-medium shadow-sm hover:bg-gray-200 transition"
+            className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium shadow-sm hover:bg-gray-200 transition"
           >
             {label}
           </button>
 
           {/* Mobile Hamburger */}
           <button
-            className="md:hidden ml-2 text-2xl"
+            className="md:hidden ml-2 text-3xl p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-all duration-200"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            ☰
+            {menuOpen ? <HiX className="text-blue-600" /> : <HiMenu className="text-blue-600" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu with Overlay */}
       {menuOpen && (
-        <div className="absolute left-0 top-16 w-full bg-white text-gray-900 rounded-xl shadow-lg flex flex-col py-2 z-50 md:hidden">
-          {mobileMenuItems.map((item, idx) =>
-            item.path ? (
-              <Link
-                key={idx}
-                to={item.path}
-                onClick={() => setMenuOpen(false)}
-                style={{ transitionDelay: `${idx * 50}ms` }}
-                className="px-4 py-2 hover:bg-gray-100 transition transform duration-300 hover:scale-105 opacity-0 animate-slideFade"
-              >
-                {item.name}
-              </Link>
-            ) : (
-              <button
-                key={idx}
-                onClick={() => { item.action(); setMenuOpen(false); }}
-                style={{ transitionDelay: `${idx * 50}ms` }}
-                className="px-4 py-2 hover:bg-gray-100 transition transform duration-300 hover:scale-105 text-left opacity-0 animate-slideFade"
-              >
-                {item.name}
-              </button>
-            )
-          )}
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            onClick={() => setMenuOpen(false)}
+          ></div>
 
-          {/* Mobile Login for not logged in */}
-          {!isLoggedIn && (
-            <button
-              onClick={onLoginClick}
-              className="px-4 py-2 mt-2 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition transform duration-300 hover:scale-105"
-            >
-              {lang === "hi" ? "लॉगिन" : "Login"}
-            </button>
-          )}
-        </div>
+          <div className="absolute left-0 top-16 w-full bg-white text-gray-800 rounded-b-2xl shadow-2xl flex flex-col py-4 z-50 animate-slideFadeDown">
+            {mobileMenuItems.map((item, idx) =>
+              item.path ? (
+                <Link
+                  key={idx}
+                  to={item.path}
+                  onClick={() => setMenuOpen(false)}
+                  style={{ transitionDelay: `${idx * 50}ms` }}
+                  className="px-6 py-3 hover:bg-blue-50 transition transform duration-300 hover:scale-105 opacity-0 animate-slideFade"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    item.action();
+                    setMenuOpen(false);
+                  }}
+                  style={{ transitionDelay: `${idx * 50}ms` }}
+                  className="px-6 py-3 hover:bg-blue-50 transition transform duration-300 hover:scale-105 text-left opacity-0 animate-slideFade"
+                >
+                  {item.name}
+                </button>
+              )
+            )}
+
+            {!isLoggedIn && (
+              <button
+                onClick={onLoginClick}
+                className="mt-4 mx-6 bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 rounded-full font-semibold shadow-md hover:shadow-lg transition transform duration-300 hover:scale-105"
+              >
+                {lang === "hi" ? "लॉगिन" : "Login"}
+              </button>
+            )}
+          </div>
+        </>
       )}
 
       <style>
@@ -194,6 +228,14 @@ function Navbar({ onLoginClick }) {
           }
           .animate-slideFade {
             animation: slideFade 0.3s forwards;
+          }
+
+          @keyframes slideFadeDown {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          .animate-slideFadeDown {
+            animation: slideFadeDown 0.3s ease-out forwards;
           }
         `}
       </style>
