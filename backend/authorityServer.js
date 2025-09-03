@@ -1,92 +1,106 @@
 import express from "express";
 import bodyParser from "body-parser";
-import path from "path";
-import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 
 const app = express();
 const PORT = 7000;
-
-// ✅ dirname fix for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-// In-memory reports storage (demo purpose)
-let reports = [];
+// ✅ MongoDB connection
+mongoose
+  .connect("mongodb://127.0.0.1:27017/localIssueReporter")
+  .then(() => console.log("✅ Mongo Connected"))
+  .catch((err) => console.error("❌ Mongo Error:", err));
 
-// ✅ Route: receive reports (backend se yaha forward hoga)
-app.post("/authority/receive", (req, res) => {
-  const { title, description, location, typeOfIssue, reportedBy } = req.body;
+// ✅ Schema & Model
+const issueSchema = new mongoose.Schema(
+  {
+    title: String,
+    description: String,
+    location: String,
+    typeOfIssue: String,
+    reportedBy: String,
+    image: String,
+    status: { type: String, default: "pending" },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { collection: "issues" } // 👈 force correct collection
+);
+const Issue = mongoose.model("Issue", issueSchema);
 
-  const newReport = {
-    title,
-    description,
-    location,
-    typeOfIssue,
-    reportedBy,
-    time: new Date().toLocaleString(),
-  };
-
-  reports.push(newReport);
-
-  console.log("📩 New report received by authority:", newReport);
-
-  res.json({ status: "ok", msg: "Report received by authority", report: newReport });
+// 🔎 Debug route - JSON check ke liye
+app.get("/debug", async (req, res) => {
+  try {
+    const issues = await Issue.find().sort({ createdAt: -1 });
+    res.json(issues);
+  } catch (err) {
+    res.status(500).json({ error: "DB fetch failed", details: err.message });
+  }
+});
+app.get("/ping", (req, res) => {
+  res.send("🏓 Pong from Authority Server");
 });
 
-// ✅ Route: show all reports in a simple HTML table
-app.get("/authority/reports", (req, res) => {
-  let html = `
-    <html>
-      <head>
-        <title>Authority Reports</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
-          h1 { color: #2563eb; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-          th { background: #2563eb; color: white; }
-          tr:nth-child(even) { background: #f1f5f9; }
-          tr:hover { background: #e0f2fe; }
-          .time { color: #6b7280; font-size: 0.9em; }
-        </style>
-      </head>
-      <body>
-        <h1>📋 Authority Portal - Received Reports</h1>
-        <table>
-          <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Location</th>
-            <th>Type</th>
-            <th>Reported By</th>
-            <th>Time</th>
-          </tr>
-          ${reports
-            .map(
-              (r) => `
+// ✅ Authority Reports route (HTML Table)
+app.get("/authority/reports", async (req, res) => {
+  try {
+    const reports = await Issue.find().sort({ createdAt: -1 });
+    let html = `
+      <html>
+        <head>
+          <title>Authority Reports</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
+            h1 { color: #2563eb; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background: #2563eb; color: white; }
+            tr:nth-child(even) { background: #f1f5f9; }
+            tr:hover { background: #e0f2fe; }
+            .time { color: #6b7280; font-size: 0.9em; }
+          </style>
+        </head>
+        <body>
+          <h1>📋 Authority Portal - Received Reports</h1>
+          <table>
             <tr>
-              <td>${r.title}</td>
-              <td>${r.description}</td>
-              <td>${r.location}</td>
-              <td>${r.typeOfIssue}</td>
-              <td>${r.reportedBy}</td>
-              <td class="time">${r.time}</td>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Reported By</th>
+              <th>Time</th>
             </tr>
-          `
-            )
-            .join("")}
-        </table>
-      </body>
-    </html>
-  `;
-  res.send(html);
+            ${reports
+              .map(
+                (r) => `
+              <tr>
+                <td>${r.title}</td>
+                <td>${r.description}</td>
+                <td>${r.location}</td>
+                <td>${r.typeOfIssue}</td>
+                <td>${r.reportedBy}</td>
+                <td class="time">${new Date(r.createdAt).toLocaleString()}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </table>
+        </body>
+      </html>
+    `;
+    res.send(html);
+  } catch (err) {
+    res.status(500).send("Error fetching reports from DB");
+  }
 });
 
-// Start server
+// ✅ Start server
 app.listen(PORT, () => {
-  console.log(`✅ Authority Portal running at http://localhost:${PORT}/authority/reports`);
+  console.log(`✅ Authority Portal running at:`);
+  console.log(`   http://localhost:${PORT}/authority/reports`);
+  console.log(`   http://localhost:${PORT}/debug`);
 });

@@ -10,7 +10,9 @@ import userRoutes from "./routes/userRoutes.js";
 import issueRoutes from "./routes/issueRoutes.js";
 
 
-dotenv.config();
+// dotenv.config();
+dotenv.config({ path: "./backend/.env" });
+
 const app = express();
 
 // Middleware
