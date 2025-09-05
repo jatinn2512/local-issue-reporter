@@ -1,4 +1,4 @@
-cat > README.md << 'EOF'
+cat << 'EOF' > README.md
 # 🌍 AI-Powered Local Issue Reporter  
 
 An intelligent platform that empowers citizens to **report local civic issues** (potholes, electricity, sanitation, etc.) and allows authorities to manage, track, and resolve them efficiently. Built with a **modern full-stack architecture** and enhanced with **AI-powered features** for automatic issue detection and descriptions.  
