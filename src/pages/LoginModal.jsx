@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { useLogin } from "../context/LoginContext";
 import API from "../api/api";
 
 function LoginModal({ isOpen, onClose, lang }) {
+  // --- all hooks MUST be declared unconditionally at top
   const { login } = useLogin();
   const [mode, setMode] = useState("email"); // email / phone
   const [isSignup, setIsSignup] = useState(false); // login / signup toggle
@@ -16,6 +18,38 @@ function LoginModal({ isOpen, onClose, lang }) {
   const [otpSent, setOtpSent] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Prevent background scroll while modal open (restore on unmount)
+    useEffect(() => {
+    if (!isOpen) return;
+
+    // --- prevent body scroll AND avoid layout shift by reserving scrollbar width ---
+    const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight || "";
+
+    // compute scrollbar width (difference between window innerWidth and doc clientWidth)
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    document.body.style.overflow = "hidden";
+
+    // also prevent touchmove on background for mobile (optional, safe)
+    const preventTouch = (e) => {
+      // allow inside-modal scrolling, block outside
+      if (!e.target.closest("[role='dialog']")) e.preventDefault();
+    };
+    document.addEventListener("touchmove", preventTouch, { passive: false });
+
+    return () => {
+      // restore
+      document.body.style.overflow = prevOverflow || "";
+      document.body.style.paddingRight = prevPaddingRight;
+      document.removeEventListener("touchmove", preventTouch, { passive: false });
+    };
+  }, [isOpen]);
+
+
+  // keep original behavior: if not open, render nothing (after hooks)
   if (!isOpen) return null;
 
   const handleLogin = async (e) => {
@@ -85,11 +119,14 @@ function LoginModal({ isOpen, onClose, lang }) {
     setGeneratedOtp("");
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 flex items-start sm:items-center justify-center p-4 sm:p-0 bg-black/60 z-50 backdrop-blur-sm">
       <div
-        className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:w-96 p-6 sm:p-8 relative border border-gray-300
+        className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:w-96 p-6 sm:p-8 pt-6 sm:pt-0 relative border border-gray-300
         transform transition-all duration-300 ease-out animate-modalOpen max-h-[90vh] overflow-auto"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
         {/* Close Button */}
         <button
@@ -147,7 +184,7 @@ function LoginModal({ isOpen, onClose, lang }) {
           </button>
         </div>
 
-        {/* --- LOGIN FORM --- */}
+        {/* --- LOGIN / SIGNUP UI (unchanged) --- */}
         {!isSignup ? (
           <>
             {mode === "email" ? (
@@ -256,7 +293,7 @@ function LoginModal({ isOpen, onClose, lang }) {
                   type="submit"
                   className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600"
                 >
-                  {lang === "hi" ? "साइन अप करें" : "Sign Up"}
+                  {lang === "hi" ? "साइन up करें" : "Sign Up"}
                 </button>
               </form>
             ) : (
@@ -328,9 +365,7 @@ function LoginModal({ isOpen, onClose, lang }) {
         {/* Success message */}
         {success && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center text-green-600 font-bold text-xl rounded-2xl animate-fadeIn">
-            {lang === "hi"
-              ? "सफलतापूर्वक लॉगिन हुआ!"
-              : "Successfully logged in!"}
+            {lang === "hi" ? "सफलतापूर्वक लॉगिन हुआ!" : "Successfully logged in!"}
           </div>
         )}
       </div>
@@ -356,6 +391,8 @@ function LoginModal({ isOpen, onClose, lang }) {
       </style>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 }
 
 export default LoginModal;

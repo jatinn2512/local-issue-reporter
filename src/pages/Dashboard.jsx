@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import Card from "../components/Card";
@@ -7,20 +8,28 @@ function Dashboard() {
   const [reports, setReports] = useState([]);
   const userEmail = localStorage.getItem("userEmail");
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        if (!userEmail) return;
-        const res = await fetch(
-          `http://localhost:5000/api/issues?reportedBy=${userEmail}`
-        );
-        const data = await res.json();
-        setReports(data);
-      } catch (error) {
-        console.error("Error fetching issues:", error);
+  const fetchReports = async () => {
+    try {
+      if (!userEmail) return;
+      const res = await fetch(
+        `http://localhost:5000/api/issues?reportedBy=${encodeURIComponent(userEmail)}`
+      );
+      if (!res.ok) {
+        console.error("Fetch error", res.status);
+        return;
       }
-    };
+      const data = await res.json();
+      setReports(data);
+    } catch (error) {
+      console.error("Error fetching issues:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchReports();
+    const iv = setInterval(fetchReports, 8000); // poll every 8s
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail]);
 
   return (

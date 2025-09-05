@@ -1,15 +1,35 @@
+// src/components/Card.jsx
 import React from "react";
 
 function Card({ title, description, location, status }) {
-  // Status color mapping (light-friendly)
-  const statusColors = {
-    pending:
-      "bg-yellow-100 text-yellow-700 border border-yellow-300 shadow-sm",
-    complete:
-      "bg-green-100 text-green-700 border border-green-300 shadow-sm",
-    inprogress:
-      "bg-blue-100 text-blue-700 border border-blue-300 shadow-sm",
+  // Normalize incoming status to expected keys
+  const s = (status || "").toString().toLowerCase();
+
+  // Map canonical status -> styles & display text
+  const map = {
+    pending: {
+      class: "bg-yellow-100 text-yellow-700 border border-yellow-300 shadow-sm",
+      label: "Pending",
+    },
+    in_progress: {
+      class: "bg-blue-100 text-blue-700 border border-blue-300 shadow-sm",
+      label: "In Progress",
+    },
+    "in-progress": {
+      class: "bg-blue-100 text-blue-700 border border-blue-300 shadow-sm",
+      label: "In Progress",
+    },
+    resolved: {
+      class: "bg-green-100 text-green-700 border border-green-300 shadow-sm",
+      label: "Solved",
+    },
+    complete: {
+      class: "bg-green-100 text-green-700 border border-green-300 shadow-sm",
+      label: "Solved",
+    },
   };
+
+  const statusInfo = map[s] || { class: "bg-gray-100 text-gray-600", label: s || "Unknown" };
 
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-md p-6 flex flex-col border border-gray-200 hover:border-blue-400/50 hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
@@ -27,14 +47,13 @@ function Card({ title, description, location, status }) {
       <div className="mt-auto flex items-center justify-between">
         <p className="text-sm text-gray-600 flex items-center gap-1">
           <span className="text-lg">📍</span>
-          <span className="italic">{location}</span>
+          <span className="italic">{location || "—"}</span>
         </p>
+
         <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-colors duration-200 ${
-            statusColors[status?.toLowerCase()] || "bg-gray-100 text-gray-600"
-          }`}
+          className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition-colors duration-200 ${statusInfo.class}`}
         >
-          {status}
+          {statusInfo.label}
         </span>
       </div>
     </div>
