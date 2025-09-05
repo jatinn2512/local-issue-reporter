@@ -39,56 +39,68 @@ function ReportIssue() {
   }, []);
 
   const handleImageChange = async (e) => {
-  try {
-    const file = e?.target?.files?.[0];
-    if (!file) return;
-
-    // set preview
-    setImage(file);
-    setPreviewUrl(URL.createObjectURL(file));
-
-    setIsDetecting(true);
-    setDescription("");
-    setIssueType("");
-
-    const fd = new FormData();
-    fd.append("image", file);
-
-    // ✅ make sure backend URL correct hai
-    const DETECT_URL = "http://localhost:5000/api/ai/detect";
-
-    const res = await fetch(DETECT_URL, {
-      method: "POST",
-      body: fd,
-    });
-
-    console.log("Detect request status:", res.status);
-
-    let data;
     try {
-      data = await res.json();
+      const file = e?.target?.files?.[0];
+      if (!file) return;
+
+      // preview straight away
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+
+      setIsDetecting(true);
+      setDescription("");
+      setIssueType("");
+
+      const fd = new FormData();
+      fd.append("image", file);
+
+      // include the current location value (if any) so server can include it in fallback paragraph
+      if (location) fd.append("location", location);
+
+      const DETECT_URL = "http://localhost:5000/api/ai/detect"; // change port if needed
+
+      console.log("Sending image to detect endpoint...", file.name);
+
+      const res = await fetch(DETECT_URL, {
+        method: "POST",
+        body: fd,
+      });
+
+      console.log("Detect HTTP status:", res.status);
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        const t = await res.text();
+        console.error("Detect response not JSON:", err, t);
+        setIsDetecting(false);
+        return;
+      }
+
+      console.log("Detect response:", data);
+
+      // Always set description if server returned one (fallback or HF)
+      if (data.description) {
+        // keep it as paragraph (textarea supports newlines). If server gives multiple sentences, they'll be shown.
+        setDescription(data.description);
+      } else {
+        // safety fallback
+        setDescription("Please describe the issue briefly.");
+      }
+
+      // Use server-detected issue type if available and not empty
+      if (data.typeOfIssue) {
+        setIssueType(data.typeOfIssue);
+      } else {
+        setIssueType("other");
+      }
     } catch (err) {
-      console.error("Failed to parse JSON:", err);
+      console.error("Detection error:", err);
+    } finally {
       setIsDetecting(false);
-      return;
     }
-
-    console.log("Detect response:", data);
-
-    if (res.ok) {
-      if (data.description) setDescription(data.description);
-      if (data.typeOfIssue) setIssueType(data.typeOfIssue);
-      if (data.location) setLocation((prev) => prev || data.location);
-    } else {
-      setDescription(data.error || "Detection failed");
-    }
-  } catch (err) {
-    console.error("Detection error:", err);
-  } finally {
-    setIsDetecting(false);
-  }
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
