@@ -86,21 +86,22 @@ function LoginModal({ isOpen, onClose, lang }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-start sm:items-center justify-center p-4 sm:p-0 bg-black/60 z-50 backdrop-blur-sm">
       <div
-        className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl w-96 p-8 relative border border-gray-300 
-        transform transition-all duration-300 ease-out animate-modalOpen"
+        className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:w-96 p-6 sm:p-8 relative border border-gray-300
+        transform transition-all duration-300 ease-out animate-modalOpen max-h-[90vh] overflow-auto"
       >
         {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl transition-transform duration-200 hover:scale-125"
           onClick={onClose}
+          aria-label="Close login modal"
         >
           ×
         </button>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center animate-bounce">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           {isSignup
             ? lang === "hi"
               ? "साइन अप"
@@ -113,7 +114,7 @@ function LoginModal({ isOpen, onClose, lang }) {
         {/* Email/Phone Toggle */}
         <div className="flex mb-6 rounded-lg overflow-hidden border border-gray-300">
           <button
-            className={`flex-1 py-2 transition-all duration-200 ${
+            className={`flex-1 py-2 transition-all duration-200 text-sm sm:text-base ${
               mode === "email"
                 ? "bg-green-500 text-white"
                 : "bg-gray-100 text-gray-600 hover:text-gray-900"
@@ -129,7 +130,7 @@ function LoginModal({ isOpen, onClose, lang }) {
               : "Email Login"}
           </button>
           <button
-            className={`flex-1 py-2 transition-all duration-200 ${
+            className={`flex-1 py-2 transition-all duration-200 text-sm sm:text-base ${
               mode === "phone"
                 ? "bg-green-500 text-white"
                 : "bg-gray-100 text-gray-600 hover:text-gray-900"
@@ -342,14 +343,14 @@ function LoginModal({ isOpen, onClose, lang }) {
             100% {opacity: 1; transform: translateY(0) scale(1);}
           }
           .animate-modalOpen {
-            animation: modalOpen 0.3s ease-out forwards;
+            animation: modalOpen 0.28s ease-out forwards;
           }
           @keyframes fadeIn {
             from {opacity: 0;}
             to {opacity: 1;}
           }
           .animate-fadeIn {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.45s ease-out forwards;
           }
         `}
       </style>

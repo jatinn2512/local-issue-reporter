@@ -64,15 +64,13 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Hero Section */}
       <div className="flex-1 flex items-center justify-center py-20 px-6">
         <div className="max-w-6xl w-full flex flex-col md:flex-row items-center gap-12 bg-white rounded-3xl shadow-2xl p-12 hover:shadow-3xl transition">
-          {/* Left Image */}
           <motion.div
-            initial={{ x: -120, opacity: 0 }}
+            initial={{ x: -60, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.9, ease: "easeOut", type: "spring", stiffness: 70, damping: 14 }}
             className="flex-1 flex justify-center md:justify-start"
           >
             <img
@@ -82,12 +80,11 @@ function Home() {
             />
           </motion.div>
 
-          {/* Right Text */}
           <motion.div
-            initial={{ x: 120, opacity: 0 }}
+            initial={{ x: 60, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.9, ease: "easeOut", type: "spring", stiffness: 70, damping: 14 }}
             className="flex-1 text-center md:text-left"
           >
             <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-snug bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -114,11 +111,7 @@ function Home() {
         </div>
       </div>
 
-      {/* About Section */}
-      <section
-        id="about-section"
-        className="bg-gradient-to-r from-blue-50 to-indigo-50 py-20 px-6 text-center"
-      >
+      <section id="about-section" className="bg-gradient-to-r from-blue-50 to-indigo-50 py-20 px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
           {isHindi ? "हमारे बारे में" : "About Us"}
         </h2>
@@ -129,50 +122,46 @@ function Home() {
         </p>
       </section>
 
-      {/* Advantages Section */}
       <div className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          {isHindi
-            ? "क्यों चुनें AI-पावर्ड समस्या रिपोर्टर?"
-            : "Why Choose AI-Powered Local Issue Reporter?"}
+          {isHindi ? "क्यों चुनें AI-पावर्ड समस्या रिपोर्टर?" : "Why Choose AI-Powered Local Issue Reporter?"}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-12"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+          }}
+        >
           {advantages.map((adv, i) => {
-            const fromX = i % 2 === 0 ? -120 : 120; // alternate direction
+            const fromX = i % 2 === 0 ? -100 : 100;
             return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: fromX }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center text-center hover:shadow-2xl transform transition-transform hover:scale-105"
+                variants={{
+                  hidden: { opacity: 0, x: fromX, y: 40 },
+                  visible: { opacity: 1, x: 0, y: 0, transition: { duration: 0.9, ease: "easeOut" } },
+                }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.25, ease: "easeOut" } }}
+                className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center text-center hover:shadow-2xl"
               >
-                <img
-                  src={adv.img}
-                  alt={adv.heading}
-                  className="w-24 h-24 mb-6"
-                />
-                <h3 className="font-bold text-2xl mb-4 text-gray-900">
-                  {adv.heading}
-                </h3>
-                <p className="text-gray-600 text-base leading-relaxed">
-                  {adv.desc}
-                </p>
+                <img src={adv.img} alt={adv.heading} className="w-24 h-24 mb-6" />
+                <h3 className="font-bold text-2xl mb-4 text-gray-900">{adv.heading}</h3>
+                <p className="text-gray-600 text-base leading-relaxed">{adv.desc}</p>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-100 text-center py-8 mt-12">
-        <p className="text-gray-500 text-sm">
-          © 2025 | No Copyright | Made with ❤️ by LOOP - X Team
-        </p>
+        <p className="text-gray-500 text-sm">© 2025 | No Copyright | Made with ❤️ by LOOP - X Team</p>
       </footer>
 
-      {/* Login Modal */}
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
   );

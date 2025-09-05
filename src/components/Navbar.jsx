@@ -14,6 +14,80 @@ function Navbar({ onLoginClick }) {
   const location = useLocation();
   const profileRef = useRef(null);
 
+  // ----- Robust helper to read stored user info or derive from token/email -----
+  const getLocalUser = () => {
+    try {
+      // direct keys
+      let name =
+        localStorage.getItem("userName") ||
+        localStorage.getItem("name") ||
+        null;
+      let email =
+        localStorage.getItem("userEmail") ||
+        localStorage.getItem("email") ||
+        null;
+      let phone =
+        localStorage.getItem("userPhone") ||
+        localStorage.getItem("phone") ||
+        null;
+
+      // try JSON object
+      if (!name) {
+        const userJson = localStorage.getItem("user");
+        if (userJson) {
+          try {
+            const parsed = JSON.parse(userJson);
+            name = parsed.name || parsed.fullName || parsed.username || name;
+            email = parsed.email || email;
+            phone = parsed.phone || phone;
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
+      // try decode JWT payload for name/email fallback
+      if (!name && !email) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const base64 = token.split(".")[1];
+            const payload = JSON.parse(
+              decodeURIComponent(
+                atob(base64.replace(/-/g, "+").replace(/_/g, "/"))
+                  .split("")
+                  .map(function (c) {
+                    return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                  })
+                  .join("")
+              )
+            );
+            name = name || payload.name || payload.fullName || null;
+            email = email || payload.email || payload.emailAddress || null;
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
+      // if still no name, derive from email username part
+      if (!name && email) {
+        const uname = email.split("@")[0];
+        // beautify: replace dots/underscores with space and capitalize first letter
+        const pretty = uname.replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        name = pretty;
+      }
+
+      return { name, email, phone };
+    } catch {
+      return { name: null, email: null, phone: null };
+    }
+  };
+
+  const localUser = getLocalUser();
+  const userName = localUser?.name || null;
+  const userEmail = localUser?.email || localUser?.phone || null;
+
   const scrollToAbout = () => {
     if (location.pathname === "/") {
       const aboutSection = document.getElementById("about-section");
@@ -75,13 +149,13 @@ function Navbar({ onLoginClick }) {
   const mobileMenuItems = [...desktopMenuItems, ...profileItems];
 
   return (
-    <nav className="bg-white text-gray-800 shadow-lg sticky top-0 z-50 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto flex items-center justify-between p-4 md:p-6">
+    <nav className="sticky top-3 z-50 px-3">
+      <div className="bg-white/85 backdrop-blur-md shadow-lg border border-gray-200/60 rounded-2xl max-w-7xl mx-auto flex items-center justify-between py-3 md:py-4 px-4 md:px-6">
         {/* Logo */}
         <h1
           className="text-2xl md:text-3xl font-extrabold cursor-pointer 
-          bg-gradient-to-r from-blue-600 via-green-500 to-teal-500 bg-clip-text text-transparent
-          tracking-wide drop-shadow-md hover:scale-105 transition-transform duration-300"
+            bg-gradient-to-r from-blue-600 via-green-500 to-teal-500 bg-clip-text text-transparent
+            tracking-wide drop-shadow-md select-none"
           onClick={() => navigate("/")}
         >
           AI Local Issue Reporter
@@ -94,7 +168,7 @@ function Navbar({ onLoginClick }) {
               <Link
                 key={idx}
                 to={item.path}
-                className="relative px-4 py-2 rounded-xl text-gray-700 hover:text-blue-600 transition-all duration-200"
+                className="relative px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 transition-all duration-200"
               >
                 {item.name}
               </Link>
@@ -102,7 +176,7 @@ function Navbar({ onLoginClick }) {
               <button
                 key={idx}
                 onClick={item.action}
-                className="px-4 py-2 rounded-xl text-gray-700 hover:text-blue-600 transition-all duration-200"
+                className="px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 transition-all duration-200"
               >
                 {item.name}
               </button>
@@ -117,20 +191,23 @@ function Navbar({ onLoginClick }) {
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
                 className="text-gray-600 text-2xl hover:text-blue-600 transition"
+                aria-label="Open profile menu"
               >
                 <FaUserCircle />
               </button>
 
               {/* Dropdown */}
               <div
-                className={`absolute right-0 top-14 w-56 bg-white text-gray-800 rounded-xl shadow-xl border border-gray-200 flex flex-col py-2 z-50
-                  transform transition-all duration-300
-                  ${
-                    profileOpen
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 -translate-y-4 pointer-events-none"
-                  }`}
+                className={`absolute right-0 top-14 w-64 bg-white/95 text-gray-800 rounded-2xl shadow-2xl border border-gray-200/60 flex flex-col py-3 z-50
+                  transform transition-all duration-250
+                  ${profileOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"}`}
               >
+                {/* Profile header (display only) */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-gray-900 font-semibold truncate">{userName || "User"}</p>
+                  <p className="text-gray-500 text-sm truncate">{userEmail || ""}</p>
+                </div>
+
                 {profileItems.map((item, idx) => (
                   <button
                     key={idx}
@@ -138,7 +215,7 @@ function Navbar({ onLoginClick }) {
                       item.action();
                       setProfileOpen(false);
                     }}
-                    className="px-4 py-2 hover:bg-gray-100 text-left transition transform hover:scale-105"
+                    className="px-4 py-3 hover:bg-gray-50 text-left transition"
                   >
                     {item.name}
                   </button>
@@ -150,7 +227,7 @@ function Navbar({ onLoginClick }) {
           {!isLoggedIn && (
             <button
               onClick={onLoginClick}
-              className="hidden md:block bg-gradient-to-r from-blue-600 to-green-500 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+              className="hidden md:block bg-[#0b63c6] text-white px-5 py-2 rounded-full font-semibold shadow-md hover:brightness-95 transition-all duration-300"
             >
               {lang === "hi" ? "लॉगिन" : "Login"}
             </button>
@@ -163,12 +240,13 @@ function Navbar({ onLoginClick }) {
             {label}
           </button>
 
-          {/* Mobile Hamburger */}
+          {/* Mobile Hamburger (transparent bg) */}
           <button
-            className="md:hidden ml-2 text-3xl p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-all duration-200"
+            className="md:hidden ml-2 text-3xl p-2 rounded-md bg-transparent transition-all duration-200"
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
           >
-            {menuOpen ? <HiX className="text-blue-600" /> : <HiMenu className="text-blue-600" />}
+            {menuOpen ? <HiX className="text-white" /> : <HiMenu className="text-blue-600" />}
           </button>
         </div>
       </div>
@@ -176,12 +254,26 @@ function Navbar({ onLoginClick }) {
       {/* Mobile Menu with Overlay */}
       {menuOpen && (
         <>
+          {/* Blurring overlay (stronger blur + slightly darker) */}
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-lg z-40"
             onClick={() => setMenuOpen(false)}
           ></div>
 
-          <div className="absolute left-0 top-16 w-full bg-white text-gray-800 rounded-b-2xl shadow-2xl flex flex-col py-4 z-50 animate-slideFadeDown">
+          <div className="absolute left-0 top-20 w-full bg-white/95 text-gray-800 rounded-b-2xl shadow-2xl flex flex-col py-4 z-50 animate-slideFadeDown backdrop-blur-sm">
+            {/* Mobile profile header */}
+            {isLoggedIn && (
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+                <div className="text-2xl text-gray-700">
+                  <FaUserCircle />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-900 font-semibold truncate">{userName || "User"}</p>
+                  <p className="text-gray-500 text-sm truncate">{userEmail || ""}</p>
+                </div>
+              </div>
+            )}
+
             {mobileMenuItems.map((item, idx) =>
               item.path ? (
                 <Link
@@ -211,7 +303,7 @@ function Navbar({ onLoginClick }) {
             {!isLoggedIn && (
               <button
                 onClick={onLoginClick}
-                className="mt-4 mx-6 bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 rounded-full font-semibold shadow-md hover:shadow-lg transition transform duration-300 hover:scale-105"
+                className="mt-4 mx-6 bg-[#0b63c6] text-white py-2 rounded-full font-semibold shadow-md hover:brightness-95 transition transform duration-300 hover:scale-105"
               >
                 {lang === "hi" ? "लॉगिन" : "Login"}
               </button>
@@ -231,11 +323,11 @@ function Navbar({ onLoginClick }) {
           }
 
           @keyframes slideFadeDown {
-            0% { opacity: 0; transform: translateY(-10px); }
+            0% { opacity: 0; transform: translateY(-6px); }
             100% { opacity: 1; transform: translateY(0); }
           }
           .animate-slideFadeDown {
-            animation: slideFadeDown 0.3s ease-out forwards;
+            animation: slideFadeDown 0.28s ease-out forwards;
           }
         `}
       </style>
