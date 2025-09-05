@@ -34,7 +34,7 @@ An intelligent platform that empowers citizens to **report local civic issues** 
 ---
 
 ## 📂 Project Structure  
-\`\`\`
+```bash
 AI-Powered-Local-Issue-Reporter/
 ├── backend/                  # Backend (Node.js + Express)
 │   ├── config/               # DB and server configurations
@@ -68,37 +68,36 @@ AI-Powered-Local-Issue-Reporter/
 ├── package-lock.json         # Dependency lockfile
 ├── postcss.config.js         # PostCSS configuration
 └── README.md                 # Project documentation
-\`\`\`
+```
 
 ---
 
 ## 🚀 Getting Started  
 ### 1️⃣ Clone the Repo  
-\`\`\`bash
+```bash
 git clone https://github.com/jatinn2512/local-issue-reporter.git
 cd local-issue-reporter
-\`\`\`
+```
 
 ### 2️⃣ Backend Setup  
-\`\`\`bash
+```bash
 cd backend
 npm install
 npm start
-\`\`\`
+```
 
 ### 3️⃣ Frontend Setup  
-\`\`\`bash
+```bash
 cd frontend
 npm install
 npm run dev
-\`\`\`
+```
 
 ---
 
-## 📸 Screenshots  
-👉 *(Add screenshots/GIFs of your app here for better showcase)*  
+<!-- ## 📸 Screenshots  
 
----
+--->
 
 ## 🤝 Contributing  
 1. Fork the repo 🍴  
